@@ -1,17 +1,38 @@
-# GitScope — GitHub Developer Intelligence & Cache Registry
+# 🚀 GitHub Profile Analyzer API (GitScope)
+
+A professional, recruiter-grade REST API and interactive developer dashboard built with **Node.js, Express.js, MySQL, and the GitHub REST API**. It analyzes public GitHub developer profiles and generates actionable insights from repositories, languages, stars, forks, followers, and code updates.
 
 🌐 **Live Deployed Dashboard**: [https://github-profile-analyzer-api-lbd6.onrender.com/](https://github-profile-analyzer-api-lbd6.onrender.com/)  
 📖 **Live Interactive API Documentation (Swagger)**: [https://github-profile-analyzer-api-lbd6.onrender.com/api-docs](https://github-profile-analyzer-api-lbd6.onrender.com/api-docs)
 
-GitScope is a production-grade backend service built using Node.js, Express.js, and MySQL. It retrieves profile data and repository statistics from the GitHub public API, aggregates advanced developer metrics, stores insights in a MySQL database, and serves an interactive dark glassmorphic client dashboard.
+---
 
-This implementation follows the Clean Architecture / MVC blueprint with a service-repository layer, security controls, Swagger API documentation, local caching, and request rate-limiting.
+## 📌 Features
+
+* **Profile Analysis**: Fetch and parse public user details.
+* **Repository Analytics**: Scan user repositories (up to 300 repos) to calculate total stars, total forks, and open issues.
+* **Advanced Insights**:
+  * Identify top programming language.
+  * Determine the most popular repository.
+  * Calculate follower-to-following ratio.
+  * Compute average stars earned per repository.
+  * Generate a repository activity score (based on update recency).
+  * Calculate account age in years.
+* **Storage**: Persistent analytics cached in a MySQL database.
+* **Security & Performance**:
+  * Internal request caching (`node-cache`) to prevent GitHub API rate-limiting.
+  * HTTP security headers protection using `helmet`.
+  * IP-based rate limiting via `express-rate-limit`.
+  * Centralized error middleware.
+* **Modern Developer Dashboard**: A responsive dark glassmorphic single-page portal served directly from the backend to search, delete, and view profiles.
 
 ---
 
-## 📁 Overhauled Project Structure
+## 📂 Project Structure
 
-```text
+```bash
+github-profile-analyzer-api/
+│
 ├── src/
 │   ├── config/
 │   │   └── db.js                 # MySQL Pool & automated table migrator
@@ -19,21 +40,22 @@ This implementation follows the Clean Architecture / MVC blueprint with a servic
 │   │   └── profile.controller.js # Maps HTTP queries to database models/services
 │   ├── middlewares/
 │   │   ├── error.middleware.js   # Centralized JSON error catcher
-│   │   └── rateLimiter.js        # IP rate limiter (express-rate-limit)
+│   │   └── rateLimiter.js        # IP rate limiter (100 requests per 15 mins)
 │   ├── models/
 │   │   └── profile.model.js      # Raw SQL queries wrapper (repository layer)
 │   ├── routes/
 │   │   └── profile.routes.js     # API endpoints declarations
 │   ├── services/
-│   │   └── github.service.js     # Axios queries with node-cache & concurrent analysis
+│   │   └── github.service.js     # Axios requests query with node-cache & concurrent analysis
 │   ├── utils/
 │   │   └── calculateInsights.js  # Analytics computations logic
 │   ├── app.js                    # Helmet, CORS, and Swagger UI configurations
 │   └── server.js                 # App server launcher (default port: 5000)
+│
 ├── sql/
 │   └── schema.sql                # Database structure table definition
 ├── postman/
-│   └── collection.json           # Importable API query collections
+│   └── collection.json           # Importable API query collection
 ├── public/
 │   ├── css/
 │   │   └── style.css             # Glassmorphism neon stylesheet
@@ -48,121 +70,148 @@ This implementation follows the Clean Architecture / MVC blueprint with a servic
 
 ---
 
-## 💎 Advanced Analytics Insights Computed
+## 🛠️ Tech Stack
 
-Instead of basic data, GitScope calculates key developer metrics:
-* **Account Age**: Calculated dynamically based on the account creation date.
-* **Follower Ratio**: Follower-to-following index (handles division by zero).
-* **Average Stars**: Total stars divided by public repository count.
-* **Top Repository**: The user's most starred repository name.
-* **Repository Activity Score**: Capped at 100 points, calculated using weighted parameters (stars volume, forks volume, repository scale, and code push recency within the last 30/90/365 days).
-* **Top 5 Starred Repositories**: Sub-array listing name, description, primary language, stars, and forks counts.
+* **Backend**: Node.js, Express.js (v5)
+* **Database**: MySQL (v8)
+* **Caching**: node-cache
+* **External APIs**: GitHub REST API
+* **Security**: Helmet, Express Rate Limit
+* **Documentation**: Swagger UI
+* **Testing**: Postman
 
 ---
 
-## 🚀 Setup & Installation Instructions
+## ⚙️ Environment Variables
 
-### 1. Prerequisites
-Make sure you have installed:
-* [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended)
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) (optional, for easy local database setup)
-* Or a local installation of [MySQL Server](https://dev.mysql.com/downloads/installer/)
+Create a `.env` file in the root directory:
 
-### 2. Install Packages
-Clone the repository and run:
-```bash
-npm install
-```
-
-### 3. Spin Up Local MySQL (Using Docker)
-If you have Docker installed, you can start MySQL inside a background container with one command:
-```bash
-docker-compose up -d
-```
-*This starts a MySQL instance running on port `3306` with root credentials (`root`/`root_password`).*
-
-### 4. Environment Configuration
-Copy the template configuration file:
-```bash
-cp .env.example .env
-```
-Open `.env` and fill in details (port defaults to 5000):
-```ini
+```env
 PORT=5000
 NODE_ENV=development
 
-# MySQL Credentials
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=root_password
+DB_PASSWORD=your_password
 DB_NAME=github_analyzer
 
-# Highly Recommended: personal access token to prevent API limits blocks
-# Create at: https://github.com/settings/tokens
-GITHUB_TOKEN=
+# Optional: GitHub token to increase API rate limits (recommended)
+GITHUB_TOKEN=your_github_personal_access_token
 ```
 
 ---
 
-## 🖥️ Running the Application
+## 🚀 Installation & Local Setup
 
-### Development Mode (with hot-reloading)
-```bash
-npm run dev
-```
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/naina766/github-profile-analyzer-api.git
+   cd github-profile-analyzer-api
+   ```
 
-### Production Mode
-```bash
-npm start
-```
-*On boot, the database `github_analyzer` and table `github_profiles` are checked and migrated automatically.*
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Start MySQL database**:
+   * If you have Docker, run:
+     ```bash
+     docker-compose up -d
+     ```
+   * Or ensure your local MySQL Server service is active.
+
+4. **Run the application**:
+   * For Development:
+     ```bash
+     npm run dev
+     ```
+   * For Production:
+     ```bash
+     npm start
+     ```
 
 Open **[http://localhost:5000](http://localhost:5000)** in your browser to load the dashboard.
 
 ---
 
-## 🔌 API Endpoints Specifications
+## 📊 API Endpoints
 
-### 1. Interactive Swagger Documentation
-Open **[http://localhost:5000/api-docs](http://localhost:5000/api-docs)** in your browser to view the OpenAPI UI and execute request queries directly from the screen.
+### 1. Analyze GitHub Profile
+Queries GitHub API, aggregates metrics, and caches them in the database.
+* **HTTP Method**: `POST`
+* **Route**: `/api/profiles/analyze/:username`
+* **Example**: `POST /api/profiles/analyze/octocat`
 
-### 2. Analyze Profile
-* **URL**: `/api/profiles/analyze/:username`
-* **Method**: `POST`
-* **Description**: Queries GitHub API, computes metrics, and caches insights in MySQL.
-* **Response**: `200 OK` returns analyzed profile insights.
+### 2. Get All Profiles
+Lists cached profiles from the database (supports `search`, `page`, `limit`, `sortBy`, `order`).
+* **HTTP Method**: `GET`
+* **Route**: `/api/profiles`
 
-### 3. Get Analyzed List
-* **URL**: `/api/profiles`
-* **Method**: `GET`
-* **Parameters**: `page`, `limit`, `search` (matches username, name, bio), `sortBy`, `order`.
-* **Response**: `200 OK` returns paginated registry array.
+### 3. Get Registry Analytics
+Aggregated database statistics (total users count, average followers, most common language, top follower developer).
+* **HTTP Method**: `GET`
+* **Route**: `/api/profiles/analytics`
 
-### 4. Get Registry Analytics
-* **URL**: `/api/profiles/analytics`
-* **Method**: `GET`
-* **Description**: Aggregated database statistics (total users count, average followers, most common language, top follower developer).
+### 4. Get Single Cache Profile
+Returns cached details and calculated insights.
+* **HTTP Method**: `GET`
+* **Route**: `/api/profiles/:username`
 
-### 5. Get Single Cache Profile
-* **URL**: `/api/profiles/:username`
-* **Method**: `GET`
+### 5. Refresh Profile
+Evicts memory caches and updates MySQL with fresh GitHub API data.
+* **HTTP Method**: `PUT`
+* **Route**: `/api/profiles/refresh/:username`
 
-### 6. Refresh Stored Profile
-* **URL**: `/api/profiles/refresh/:username`
-* **Method**: `PUT`
-* **Description**: Evicts local node-cache keys, calls the live API, and updates the database record.
+### 6. Delete Profile
+* **HTTP Method**: `DELETE`
+* **Route**: `/api/profiles/:username`
 
-### 7. Delete Cache Profile
-* **URL**: `/api/profiles/:username`
-* **Method**: `DELETE`
-
-### 8. Health Check
-* **URL**: `/health`
-* **Method**: `GET`
+### 7. Health Check
+* **HTTP Method**: `GET`
+* **Route**: `/health`
 
 ---
 
-## 📬 Testing with Postman
+## 🗄️ Database Schema
 
-Import [postman/collection.json](file:///d:/Assignment/GithubProfileAnalyzer/postman/collection.json) directly into Postman to load pre-configured endpoints and check variables pointing to `http://localhost:5000`.
+### github_profiles
+
+Stores:
+* `github_id` (Unique GitHub identifier)
+* `username` (GitHub handle)
+* `name` (Full name)
+* `bio` (User description)
+* `public_repos` (Repository count)
+* `followers` / `following`
+* `total_stars` / `total_forks`
+* `top_language` (Most frequent primary language)
+* `top_repo` (Most starred repository)
+* `follower_following_ratio`
+* `average_stars_per_repo`
+* `repo_activity_score`
+* `account_age_years`
+* `organizations_count`
+* `profile_url`
+* `account_created_at`
+* `analyzed_at` (Timestamp of last cache)
+
+---
+
+## 🧪 Testing
+
+Open Postman, click **Import**, and load the [postman/collection.json](file:///d:/Assignment/GithubProfileAnalyzer/postman/collection.json) file. The requests are pre-configured to point to `{{base_url}}` (defaults to `http://localhost:5000`).
+
+---
+
+## 👨‍💻 Author
+
+**Naina Varshney**
+* **GitHub**: [https://github.com/naina766](https://github.com/naina766)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
