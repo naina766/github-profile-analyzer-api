@@ -1,5 +1,8 @@
 # GitScope — GitHub Developer Intelligence & Cache Registry
 
+🌐 **Live Deployed Dashboard**: [https://github-profile-analyzer-api-lbd6.onrender.com/](https://github-profile-analyzer-api-lbd6.onrender.com/)  
+📖 **Live Interactive API Documentation (Swagger)**: [https://github-profile-analyzer-api-lbd6.onrender.com/api-docs](https://github-profile-analyzer-api-lbd6.onrender.com/api-docs)
+
 GitScope is a production-grade backend service built using Node.js, Express.js, and MySQL. It retrieves profile data and repository statistics from the GitHub public API, aggregates advanced developer metrics, stores insights in a MySQL database, and serves an interactive dark glassmorphic client dashboard.
 
 This implementation follows the Clean Architecture / MVC blueprint with a service-repository layer, security controls, Swagger API documentation, local caching, and request rate-limiting.
