@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An elegant, interactive developer dashboard to analyze GitHub profile metrics, including stars, forks, and language usage.">
+  <title>GitScope | Professional GitHub Profile Analyzer & Database Insights</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+  <div class="bg-glow glow-3"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo">
+        <i data-lucide="github" class="logo-icon"></i>
+        <h1>Git<span class="text-accent">Scope</span></h1>
+      </div>
+      <p class="subtitle">GitHub Profile Intelligence & Developer Analytics Registry</p>
+    </header>
+
+    <!-- DB Status Alert (Shown only when offline) -->
+    <div id="db-status-banner" class="db-status-banner hidden">
+      <i data-lucide="database-backup"></i>
+      <span id="db-status-text">Database is offline. Profiles will be fetched live but not cached.</span>
+    </div>
+
+    <!-- Search Section -->
+    <section class="search-section">
+      <div class="glass-panel search-card">
+        <form id="search-form" class="search-form">
+          <div class="input-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input 
+              type="text" 
+              id="username-input" 
+              placeholder="Enter GitHub username (e.g. torvalds, octocat)" 
+              required
+              autocomplete="off"
+            >
+          </div>
+          <button type="submit" id="search-btn">
+            <span>Analyze</span>
+            <i data-lucide="sparkles" class="btn-icon"></i>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Global Registry Analytics Summary -->
+    <section id="global-analytics-section" class="global-analytics-section hidden">
+      <div class="glass-panel global-analytics-panel">
+        <h2 class="panel-title-large">
+          <i data-lucide="database"></i>
+          Cached Registry Analytics
+        </h2>
+        <div class="global-stats-grid">
+          <div class="global-stat-card">
+            <span class="global-label">Analyzed Profiles</span>
+            <span id="global-total-users" class="global-val">0</span>
+          </div>
+          <div class="global-stat-card">
+            <span class="global-label">Average Followers</span>
+            <span id="global-avg-followers" class="global-val">0</span>
+          </div>
+          <div class="global-stat-card">
+            <span class="global-label">Most Common Language</span>
+            <span id="global-common-lang" class="global-val">N/A</span>
+          </div>
+          <div class="global-stat-card" id="global-star-dev-card">
+            <span class="global-label">Top Developer in Cache</span>
+            <div class="star-dev-details">
+              <img id="global-star-avatar" src="" alt="avatar" class="mini-avatar hidden">
+              <span id="global-star-name">N/A</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loader (Hidden by default) -->
+    <div id="loader" class="loader-container hidden">
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <p>Scanning repositories and mining insights...</p>
+    </div>
+
+    <!-- Main Results Section (Hidden by default) -->
+    <main id="analysis-results" class="results-container hidden">
+      <div class="results-grid">
+        
+        <!-- Profile Card -->
+        <section class="glass-panel profile-card-panel">
+          <div class="profile-header">
+            <div class="avatar-container">
+              <img id="user-avatar" src="" alt="Avatar">
+              <span class="avatar-glow"></span>
+            </div>
+            <div class="profile-title">
+              <h2 id="user-name">The Developer</h2>
+              <a id="user-github-link" href="#" target="_blank" class="username-link">
+                @<span id="user-username">username</span>
+                <i data-lucide="external-link" class="inline-icon"></i>
+              </a>
+            </div>
+          </div>
+          
+          <p id="user-bio" class="user-bio">No bio description available.</p>
+          
+          <div class="profile-details-list">
+            <div class="detail-item" id="detail-location-container">
+              <i data-lucide="map-pin"></i>
+              <span id="user-location">Earth</span>
+            </div>
+            <div class="detail-item" id="detail-company-container">
+              <i data-lucide="building"></i>
+              <span id="user-company">Independent</span>
+            </div>
+            <div class="detail-item" id="detail-blog-container">
+              <i data-lucide="link"></i>
+              <a id="user-blog" href="#" target="_blank">website.dev</a>
+            </div>
+            <div class="detail-item" id="detail-twitter-container">
+              <i data-lucide="twitter"></i>
+              <a id="user-twitter" href="#" target="_blank">@twitter</a>
+            </div>
+            <div class="detail-item">
+              <i data-lucide="calendar"></i>
+              <span>Joined <span id="user-joined">Jan 2011</span></span>
+            </div>
+            
+            <hr class="card-divider">
+            
+            <!-- Advanced Insights Badges -->
+            <div class="detail-item" id="detail-age-container">
+              <i data-lucide="history" class="insight-icon text-teal"></i>
+              <span>Account Age: <span id="user-age" class="insight-highlight">0</span> years</span>
+            </div>
+            <div class="detail-item" id="detail-ratio-container">
+              <i data-lucide="percent" class="insight-icon text-violet"></i>
+              <span>Follower Ratio: <span id="user-ratio" class="insight-highlight">0.00</span></span>
+            </div>
+            <div class="detail-item" id="detail-orgs-container">
+              <i data-lucide="network" class="insight-icon text-pink"></i>
+              <span>Organizations: <span id="user-orgs" class="insight-highlight">0</span></span>
+            </div>
+            <div class="detail-item" id="detail-activity-container">
+              <i data-lucide="zap" class="insight-icon text-amber"></i>
+              <span>Activity Score: <span id="user-activity" class="badge badge-activity">0.00</span></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Insights Summary Grid -->
+        <section class="insights-dashboard">
+          <div class="stats-grid">
+            <!-- Public Repos -->
+            <div class="glass-panel stat-card border-violet">
+              <div class="stat-icon-wrapper text-violet">
+                <i data-lucide="folder-git-2"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Public Repos</span>
+                <h3 id="stat-repos" class="stat-value">0</h3>
+              </div>
+            </div>
+            
+            <!-- Followers -->
+            <div class="glass-panel stat-card border-teal">
+              <div class="stat-icon-wrapper text-teal">
+                <i data-lucide="users"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Followers</span>
+                <h3 id="stat-followers" class="stat-value">0</h3>
+              </div>
+            </div>
+
+            <!-- Following -->
+            <div class="glass-panel stat-card border-pink">
+              <div class="stat-icon-wrapper text-pink">
+                <i data-lucide="user-plus"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Following</span>
+                <h3 id="stat-following" class="stat-value">0</h3>
+              </div>
+            </div>
+
+            <!-- Total Stars -->
+            <div class="glass-panel stat-card border-amber">
+              <div class="stat-icon-wrapper text-amber">
+                <i data-lucide="star"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Total Stars</span>
+                <h3 id="stat-stars" class="stat-value">0</h3>
+              </div>
+            </div>
+
+            <!-- Total Forks -->
+            <div class="glass-panel stat-card border-blue">
+              <div class="stat-icon-wrapper text-blue">
+                <i data-lucide="git-fork"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Total Forks</span>
+                <h3 id="stat-forks" class="stat-value">0</h3>
+              </div>
+            </div>
+
+            <!-- Average Stars -->
+            <div class="glass-panel stat-card border-red">
+              <div class="stat-icon-wrapper text-red">
+                <i data-lucide="sparkles"></i>
+              </div>
+              <div class="stat-content">
+                <span class="stat-label">Avg Stars/Repo</span>
+                <h3 id="stat-avg-stars" class="stat-value">0.00</h3>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Repositories Panel -->
+          <div class="glass-panel top-repos-panel">
+            <h3 class="panel-title">
+              <i data-lucide="award" class="text-amber"></i>
+              Top 5 Starred Repositories
+            </h3>
+            <div id="top-repos-container" class="top-repos-container">
+              <!-- Dynamically populated -->
+              <p class="no-repos">No repository insights available.</p>
+            </div>
+          </div>
+
+          <!-- Programming Languages Breakdown -->
+          <div class="glass-panel language-panel">
+            <h3 class="panel-title">
+              <i data-lucide="code-2" class="text-violet"></i>
+              Language Distribution
+            </h3>
+            <div id="languages-container" class="languages-container">
+              <!-- Dynamically populated -->
+              <p class="no-languages">No language analytics available for this user.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- History Section -->
+    <section class="history-section">
+      <div class="glass-panel history-panel">
+        <div class="history-header">
+          <div class="title-with-icon">
+            <i data-lucide="history" class="header-icon"></i>
+            <h2>Recently Analyzed Registry</h2>
+          </div>
+          <div class="history-controls">
+            <div class="history-search">
+              <input type="text" id="history-search-input" placeholder="Search cache...">
+              <i data-lucide="filter" class="search-inline-icon"></i>
+            </div>
+            <button id="refresh-history-btn" class="icon-btn" title="Refresh list">
+              <i data-lucide="rotate-cw"></i>
+            </button>
+          </div>
+        </div>
+        
+        <div id="history-grid" class="history-grid">
+          <!-- Dynamically populated with history cards -->
+          <div class="history-empty">
+            <i data-lucide="folder-search"></i>
+            <p>No profiles analyzed yet. Enter a username above to start caching.</p>
+          </div>
+        </div>
+        
+        <!-- Pagination controls -->
+        <div id="pagination-controls" class="pagination hidden">
+          <button id="prev-page-btn" class="btn-secondary" disabled>
+            <i data-lucide="chevron-left"></i> Previous
+          </button>
+          <span id="page-indicator">Page 1 of 1</span>
+          <button id="next-page-btn" class="btn-secondary" disabled>
+            Next <i data-lucide="chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>GitScope Analyzer • Powered by Node.js/Express, MySQL & GitHub API</p>
+    </footer>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Custom Scripts -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

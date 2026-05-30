@@ -1,0 +1,231 @@
+{
+	"info": {
+		"_postman_id": "7a94bf76-7e44-482a-a9a3-9b817fdf9ff3",
+		"name": "GitScope GitHub Profile Analyzer API (Overhauled)",
+		"description": "Professional API collection for GitScope backend profiles analyzer. Features POST analysis, GET listings with filters/pagination, GET database aggregated statistics, PUT manual caching bypass refreshes, and DELETE cached items.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Analyze and Store Profile",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles/analyze/:username",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles",
+						"analyze",
+						":username"
+					],
+					"variable": [
+						{
+							"key": "username",
+							"value": "google",
+							"description": "The GitHub username to analyze"
+						}
+					]
+				},
+				"description": "Queries GitHub, aggregates stars, forks, follower ratio, activity score, account age, and organization count, then upserts the MySQL cache."
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Analyzed Profiles",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles?page=1&limit=10&search=&sortBy=analyzed_at&order=desc",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "Page number (defaults to 1)"
+						},
+						{
+							"key": "limit",
+							"value": "10",
+							"description": "Number of profiles to retrieve per page (defaults to 10)"
+						},
+						{
+							"key": "search",
+							"value": "",
+							"description": "Search keyword matching username, name, or location (optional)"
+						},
+						{
+							"key": "sortBy",
+							"value": "analyzed_at",
+							"description": "Sort column: username, name, public_repos, followers, following, total_stars, total_forks, repo_activity_score, analyzed_at (defaults to analyzed_at)"
+						},
+						{
+							"key": "order",
+							"value": "desc",
+							"description": "Sorting direction: asc or desc (defaults to desc)"
+						}
+					]
+				},
+				"description": "Retrieves the paginated list of all GitHub profiles that have been analyzed and stored in the database."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Database Analytics Insights Summary",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles/analytics",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles",
+						"analytics"
+					]
+				},
+				"description": "Returns aggregated summary metrics from the cache database: total cached profiles, average followers count, most popular language, and the top followed cached developer."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Single Analyzed Profile",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles/:username",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles",
+						":username"
+					],
+					"variable": [
+						{
+							"key": "username",
+							"value": "google",
+							"description": "The GitHub username to fetch from DB"
+						}
+					]
+				},
+				"description": "Retrieves the cached profile data and calculated insights from the database for a specific GitHub user."
+			},
+			"response": []
+		},
+		{
+			"name": "Force Refresh Profile Analysis",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles/refresh/:username",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles",
+						"refresh",
+						":username"
+					],
+					"variable": [
+						{
+							"key": "username",
+							"value": "google",
+							"description": "The GitHub username to force refresh"
+						}
+					]
+				},
+				"description": "Clears node-cache items for this user, pulls fresh metrics from the GitHub API, and updates the database record."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Stored Profile",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/api/profiles/:username",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"api",
+						"profiles",
+						":username"
+					],
+					"variable": [
+						{
+							"key": "username",
+							"value": "google",
+							"description": "The GitHub username to delete from DB"
+						}
+					]
+				},
+				"description": "Deletes the analyzed profile and its associated language statistics from the database."
+			},
+			"response": []
+		},
+		{
+			"name": "API Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Checks server health status and active MySQL database pool connectivity."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		}
+	]
+}
